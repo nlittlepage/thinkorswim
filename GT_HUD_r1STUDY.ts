@@ -53,8 +53,10 @@ def ks = ( sdp - 0.50 ) * MovingAverage(avgTypSIM, TrueRange(h, c, l), pm);
 def ka = MovingAverage(avgTypSIM, c, pm);
 plot kub = ka[-ofs] + ks[-ofs];
 kub.SetDefaultColor(Color.BLUE);
+kub.HideBubble();
 plot klb = ka[-ofs] - ks[-ofs];
 klb.SetDefaultColor(Color.BLUE);
+klb.HideBubble();
 
 ## Bollinger Bands
 def bbsd = stdev(c[-ofs], pm);
