@@ -51,16 +51,16 @@ matwo.HideBubble();
 ## Keltner Channels
 def ks = ( sdp - 0.50 ) * MovingAverage(avgTypSIM, TrueRange(h, c, l), pm);
 def ka = MovingAverage(avgTypSIM, c, pm);
-plot kub = ka[-ofs] + ks[-ofs];
+plot kub = ka + ks;
 kub.SetDefaultColor(Color.BLUE);
 kub.HideBubble();
-plot klb = ka[-ofs] - ks[-ofs];
+plot klb = ka - ks;
 klb.SetDefaultColor(Color.BLUE);
 klb.HideBubble();
 
 ## Bollinger Bands
-def bbsd = stdev(c[-ofs], pm);
-def bbml = MovingAverage(avgtypSIM, c[-ofs], pm);
+def bbsd = stdev(c, pm);
+def bbml = MovingAverage(avgtypSIM, c, pm);
 plot bblb = bbml + sdn * bbsd;
 bblb.SetDefaultColor(Color.BLUE);
 bblb.HideBubble();
