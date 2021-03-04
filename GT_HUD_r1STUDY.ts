@@ -56,7 +56,7 @@ kub.SetDefaultColor(Color.BLUE);
 kub.HideBubble();
 plot klb = ka - ks;
 klb.SetDefaultColor(Color.BLUE);
-kub.HideBubble();
+klb.HideBubble();
 
 ## Bollinger Bands
 def bbsd = stdev(c, pm);
