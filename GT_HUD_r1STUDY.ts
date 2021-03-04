@@ -36,8 +36,8 @@ plot median = (hh + ll) / 2;
 median.SetDefaultColor(Color.YELLOW);
 median.SetLineWeight(2);
 
-## 63 SMA
-plot maone = MovingAverage(avgtypSIM, c, pq);
+## 21 SMA
+plot maone = MovingAverage(avgtypSIM, c, pw);
 maone.SetDefaultColor(Color.WHITE);
 maone.SetLineWeight(2);
 maone.HideBubble();
@@ -51,14 +51,16 @@ matwo.HideBubble();
 ## Keltner Channels
 def ks = ( sdp - 0.50 ) * MovingAverage(avgTypSIM, TrueRange(h, c, l), pm);
 def ka = MovingAverage(avgTypSIM, c, pm);
-plot kub = ka[-ofs] + ks[-ofs];
+plot kub = ka + ks;
 kub.SetDefaultColor(Color.BLUE);
-plot klb = ka[-ofs] - ks[-ofs];
+kub.HideBubble();
+plot klb = ka - ks;
 klb.SetDefaultColor(Color.BLUE);
+kub.HideBubble();
 
 ## Bollinger Bands
-def bbsd = stdev(c[-ofs], pm);
-def bbml = MovingAverage(avgtypSIM, c[-ofs], pm);
+def bbsd = stdev(c, pm);
+def bbml = MovingAverage(avgtypSIM, c, pm);
 plot bblb = bbml + sdn * bbsd;
 bblb.SetDefaultColor(Color.BLUE);
 bblb.HideBubble();
@@ -78,13 +80,13 @@ AddLabel(yes, "$VIX = " + vc, if vc >= 40 then Color.RED else if vc >= 30 and vc
 AddLabel(yes, "PA: " + pa + "%" + " VPA: " + vpa + "%", if vpa <= pa then Color.RED else Color.GREEN);
 
 ## Market Phase
-def bull = c[ofs] > maone && c[ofs] > matwo && maone > matwo;
-def accu = c[ofs] > maone && c[ofs] > matwo && maone < matwo;
-def reco = c[ofs] > maone && c[ofs] < matwo && maone < matwo;
+def bull = c[ofs] > median && c[ofs] > matwo && median > matwo;
+def accu = c[ofs] > median && c[ofs] > matwo && median < matwo;
+def reco = c[ofs] > median && c[ofs] < matwo && median < matwo;
 
-def bear = c[ofs] < maone && c[ofs] < matwo && maone < matwo;
-def dist = c[ofs] < maone && c[ofs] < matwo && maone > matwo;
-def weak = c[ofs] < maone && c[ofs] > matwo && maone > matwo;
+def bear = c[ofs] < median && c[ofs] < matwo && median < matwo;
+def dist = c[ofs] < median && c[ofs] < matwo && median > matwo;
+def weak = c[ofs] < median && c[ofs] > matwo && median > matwo;
 
 AddLabel(bull, " + Markup + " , if bull is true then Color.GREEN else Color.GRAY);
 AddLabel(accu, " + Accumulation + ", if accu is true then Color.LIGHT_GREEN else Color.GRAY);
