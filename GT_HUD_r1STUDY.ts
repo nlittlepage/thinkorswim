@@ -73,20 +73,20 @@ AddCloud( bbub, kub, Color.CURRENT, Color.RED);
 AddCloud( bblb, klb, Color.RED, Color.CURRENT);
 
 ## VIX Calculated Portfolio Allocation Percentage
-def vc = close("vix");
+def vc = close("vix")[ofs];
 def pa = Round((GetNetLiq() - GetTotalCash()) / GetNetLiq() * 100, 1);
 def vpa = if vc >= 40 then 50 else if vc >= 30 and vc < 40 then 40 else if vc >= 20 and vc < 30 then 35 else if vc >= 15 and vc < 20 then 30 else 25;
 AddLabel(yes, "$VIX = " + vc, if vc >= 40 then Color.RED else if vc >= 30 and vc < 40 then Color.ORANGE else if vc >= 20 and vc < 30 then Color.YELLOW else if vc >= 15 and vc < 20 then Color.GREEN else Color.LIGHT_GRAY);
 AddLabel(yes, "PA: " + pa + "%" + " VPA: " + vpa + "%", if vpa <= pa then Color.RED else Color.GREEN);
 
 ## Market Phase
-def bull = c[ofs] > median && c[ofs] > matwo && median > matwo;
-def accu = c[ofs] > median && c[ofs] > matwo && median < matwo;
-def reco = c[ofs] > median && c[ofs] < matwo && median < matwo;
+def bull = maone > median && maone > matwo && median > matwo;
+def accu = maone > median && maone > matwo && median < matwo;
+def reco = maone > median && maone < matwo && median < matwo;
 
-def bear = c[ofs] < median && c[ofs] < matwo && median < matwo;
-def dist = c[ofs] < median && c[ofs] < matwo && median > matwo;
-def weak = c[ofs] < median && c[ofs] > matwo && median > matwo;
+def bear = maone < median && maone < matwo && median < matwo;
+def dist = maone < median && maone < matwo && median > matwo;
+def weak = maone < median && maone > matwo && median > matwo;
 
 AddLabel(bull, " + Markup + " , if bull is true then Color.GREEN else Color.GRAY);
 AddLabel(accu, " + Accumulation + ", if accu is true then Color.LIGHT_GREEN else Color.GRAY);
