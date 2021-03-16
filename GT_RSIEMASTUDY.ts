@@ -1,3 +1,5 @@
+## Copyright (c) 2015 - 2021 Hex Ventures, LLC ##
+
 declare lower;
 
 input price = close;
@@ -5,13 +7,18 @@ input EMAlength = 63;
 input RSIlength = 21;
 input RSIaverageType = AverageType.WILDERS;
 
-plot sixty = 60;
-sixty.SetDefaultColor(Color.ORANGE);
-sixty.HideBubble();
+plot ob = 70;
+ob.SetDefaultColor(Color.ORANGE);
+ob.HideBubble();
 
-plot fourty = 40;
-fourty.SetDefaultColor(Color.ORANGE);
-fourty.HideBubble();
+plot os = 30;
+os.SetDefaultColor(Color.ORANGE);
+os.HideBubble();
+
+plot ml = 50;
+ml.SetDefaultColor(Color.ORANGE);
+ml.SetPaintingStrategy(PaintingStrategy.DASHES);
+ml.HideBubble();
 
 def NetChgAvg = MovingAverage(RSIaverageType, price - price[1], RSIlength);
 def TotChgAvg = MovingAverage(RSIaverageType, AbsValue(price - price[1]), RSIlength);
