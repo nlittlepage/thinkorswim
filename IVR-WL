@@ -17,7 +17,7 @@
 
 declare hide_on_intraday; # do not display when using intra-day plots
 #input days_back = 252; # it is most common to use 1-year (or 252 trading days)
-input days_back = 126;
+input days_back = 63;
 def x;
 if GetAggregationPeriod() > AggregationPeriod.DAY {
 x=1;
