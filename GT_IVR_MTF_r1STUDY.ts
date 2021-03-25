@@ -54,10 +54,10 @@ ivr.SetDefaultColor(Color.YELLOW);
 ivr.SetLineWeight(2);
 
 ## Define Quarter and Yearly Averages
-plot pqiv = Sum(ivr, pq) / pq;
+plot pqiv = MovingAverage(avgTypSIM, ivr, pq);
 pqiv.SetDefaultColor(Color.GREEN);
 pqiv.HideBubble();
-plot pyiv = Sum(ivr, py) / py;
+plot pyiv = MovingAverage(avgtypSIM, ivr, py);
 pyiv.SetDefaultColor(Color.RED);
 pyiv.HideBubble();
 
