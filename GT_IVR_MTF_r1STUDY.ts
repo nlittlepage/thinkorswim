@@ -36,13 +36,13 @@ else if (GetSymbol() == "/6E") then close("EVZ") / 100
 else if (GetSymbol() == "/6J") then close("JYVIX") / 100 
 else if (GetSymbol() == "/6B") then close("BPVIX") / 100 
 else if (GetSymbol() == "/ZN") then close("TYVIX") / 100 
-else if (Getsymbol() == "/ZW") then close("WIV") / 100
-else if (Getsymbol() == "/ZB") then imp_volatility("TLT") 
-else if (Getsymbol() == "/ZC") then imp_volatility("CORN") 
-else if (Getsymbol() == "/ZS") then imp_volatility("SOYB") 
-else if (Getsymbol() == "/KC") then imp_volatility("JO") 
-else if (Getsymbol() == "/NG") then imp_volatility("UNG") 
-else if (Getsymbol() == "/6S") then imp_volatility("FXF") 
+else if (GetSymbol() == "/ZW") then close("WIV") / 100
+else if (GetSymbol() == "/ZB") then imp_volatility("TLT") 
+else if (GetSymbol() == "/ZC") then imp_volatility("CORN") 
+else if (GetSymbol() == "/ZS") then imp_volatility("SOYB") 
+else if (GetSymbol() == "/KC") then imp_volatility("JO") 
+else if (GetSymbol() == "/NG") then imp_volatility("UNG") 
+else if (GetSymbol() == "/6S") then imp_volatility("FXF") 
 else imp_volatility();
 
 ## Define IVR
@@ -54,7 +54,7 @@ ivr.SetDefaultColor(Color.YELLOW);
 ivr.SetLineWeight(2);
 
 ## Define Quarter and Yearly Averages
-plot pqiv = MovingAverage(avgTypSIM, ivr, pq);
+plot pqiv = MovingAverage(avgtypSIM, ivr, pq);
 pqiv.SetDefaultColor(Color.GREEN);
 pqiv.HideBubble();
 plot pyiv = MovingAverage(avgtypSIM, ivr, py);
@@ -111,11 +111,16 @@ plot hh = if IsNaN(hn) then Double.NaN else hn;
 hh.SetPaintingStrategy(PaintingStrategy.LINE);
 hh.SetDefaultColor(Color.DARK_ORANGE);
 hh.SetStyle(Curve.FIRM);
-plot ll = if IsNaN(ln) then Double.NaN else ln;;
+hh.HideBubble();
+
+plot ll = if IsNaN(ln) then Double.NaN else ln;
 ll.SetPaintingStrategy(PaintingStrategy.LINE);
 ll.SetDefaultColor(Color.DARK_ORANGE);
 ll.SetStyle(Curve.FIRM);
-plot mm = if IsNaN(mn) then Double.NaN else mn;;
+ll.HideBubble();
+
+plot mm = if IsNaN(mn) then Double.NaN else mn;
 mm.SetPaintingStrategy(PaintingStrategy.LINE);
 mm.SetDefaultColor(Color.LIGHT_ORANGE);
 mm.SetStyle(Curve.SHORT_DASH);
+mm.HideBubble();
