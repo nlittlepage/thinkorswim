@@ -49,8 +49,8 @@ matwo.SetLineWeight(2);
 matwo.HideBubble();
 
 ## Keltner Channels
-def ks = ( sdp - 0.50 ) * MovingAverage(avgTypSIM, TrueRange(h, c, l), pm);
-def ka = MovingAverage(avgTypSIM, c, pm);
+def ks = ( sdp - 0.50 ) * MovingAverage(avgtypSIM, TrueRange(h, c, l), pm);
+def ka = MovingAverage(avgtypSIM, c, pm);
 plot kub = ka + ks;
 kub.SetDefaultColor(Color.BLUE);
 kub.HideBubble();
@@ -59,7 +59,7 @@ klb.SetDefaultColor(Color.BLUE);
 klb.HideBubble();
 
 ## Bollinger Bands
-def bbsd = stdev(c, pm);
+def bbsd = StDev(c, pm);
 def bbml = MovingAverage(avgtypSIM, c, pm);
 plot bblb = bbml + sdn * bbsd;
 bblb.SetDefaultColor(Color.BLUE);
@@ -94,3 +94,5 @@ AddLabel(reco, " + Recover + ", if reco is true then Color.ORANGE else Color.GRA
 AddLabel(weak, " - Weaken - ", if weak is true then Color.LIGHT_ORANGE else Color.GRAY);
 AddLabel(dist, " - Distribution - ", if dist is true then Color.LIGHT_RED else Color.GRAY);
 AddLabel(bear, " - Markdown - ", if bear is true then Color.RED else Color.GRAY);
+
+AssignPriceColor( if low < low[1] and close < low[1] and high > high[1] then Color.ORANGE else if  low < low[1] and close > high[1] and high > high[1] then Color.ORANGE else Color.CURRENT);
