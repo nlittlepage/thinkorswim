@@ -38,7 +38,7 @@ case "Year":
 }
 
 ## Define DVLR
-def av = Average(vl, pq);
+def av = Average(vl, pl);
 def dvl = c * av;
 def pldvlH = Round(Highest(dvl, pl), 3);
 def pldvlL = Round(Lowest(dvl, pl), 3);
