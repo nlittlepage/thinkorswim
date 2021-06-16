@@ -4,7 +4,7 @@ declare lower;
 declare hide_on_intraday;
 
 ## Standard Variables
-input ts = {"Year", default "Quarter", "Month"};
+input ts = {"Year", "Semester", default "Quarter", "Month"};
 def avgtypSIM = AverageType.SIMPLE;
 def o = open;
 def h = high;
@@ -21,6 +21,7 @@ def zl = 0;
 def pw = 5;
 def pm = 21;
 def pq = 63;
+def ps = 126;
 def py = 252;
 def ofs = 1;
 
@@ -76,6 +77,13 @@ def pqivM = ( pqivH + pqivL ) / 2;
 def pqivRN = pqivH - pqivL;
 def pqivr =  if IsNaN(Round(((ivr - pqivL) / pqivRN) * 100.0, 0)) then Double.NaN else Round(((ivr - pqivL) / pqivRN) * 100.0, 0) ;
 
+## Semester
+def psivH = Round(Highest(ivr, ps), 3);
+def psivL = Round(Lowest(ivr, ps), 3);
+def psivM = ( psivH + psivL ) / 2;
+def psivRN = psivH - psivL;
+def psivr =  if IsNaN(Round(((ivr - psivL) / psivRN) * 100.0, 0)) then Double.NaN else Round(((ivr - psivL) / psivRN) * 100.0, 0) ;
+
 ## Yearly
 def pyivH = Round(Highest(ivr, py), 3);
 def pyivL = Round(Lowest(ivr, py), 3);
@@ -84,6 +92,7 @@ def pyivRN = pyivH - pyivL;
 def pyivr = if IsNaN(Round(((ivr - pyivL) / pyivRN) * 100.0, 0)) then Double.NaN else Round(((ivr - pyivL) / pyivRN) * 100.0, 0) ;
 
 AddLabel(yes, ("Y: " + pyivr + "%"), if pyivr > 50.5 then Color.GREEN else Color.RED);
+AddLabel(yes, ("S: " + psivr + "%"), if psivr > 50.5 then Color.GREEN else Color.RED);
 AddLabel(yes, ("Q: " + pqivr + "%"), if pqivr > 50.5 then Color.GREEN else Color.RED);
 AddLabel(yes, ("M: " + pmivr + "%"), if pmivr > 50.5 then Color.GREEN else Color.RED);
 
@@ -100,6 +109,10 @@ case "Quarter":
     hn = pqivH;
     ln = pqivL;
     mn = pqivM;
+case "Semester":
+    hn = psivH;
+    ln = psivL;
+    mn = psivM;
 case "Year":
     hn = pyivH;
     ln = pyivL;

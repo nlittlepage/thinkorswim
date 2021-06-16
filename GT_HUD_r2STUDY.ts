@@ -1,7 +1,16 @@
 ## Copyright (c) 2019 - 2021 Hex Ventures, LLC ##
 
+input showChannel = yes;
+input showWeekMA = no;
+input showMonthMA = yes;
+input showSimesterMA = no;
+input showYearlyMA = yes;
+input showBollinger = no;
+input showKeltner = no;
+input showBreakoutSignals = no;
+
 ## Standard Variables
-def avgtypSIM = AverageType.SIMPLE;
+input avgtypSIM = AverageType.EXPONENTIAL;
 def o = open;
 def h = high;
 def l = low;
@@ -20,6 +29,7 @@ def zl = 0;
 def pw = 5;
 def pm = 21;
 def pq = 63;
+def ps = 126;
 def py = 252;
 def ofs = 1;
 
@@ -27,36 +37,57 @@ def ofs = 1;
 plot ll = Lowest(lm, pq);
 ll.SetDefaultColor(Color.LIGHT_GRAY);
 ll.HideBubble();
+ll.SetHiding(!showChannel);
 
 plot hh = Highest(hm, pq);
 hh.SetDefaultColor(Color.LIGHT_GRAY);
 hh.HideBubble();
+hh.SetHiding(!showChannel);
 
 plot median = (hh + ll) / 2;
 median.SetDefaultColor(Color.YELLOW);
 median.SetLineWeight(2);
+median.SetHiding(!showChannel);
+
+## 5 SMA
+plot mafast = MovingAverage(avgtypSIM, c, pw);
+mafast.SetDefaultColor(Color.WHITE);
+mafast.SetLineWeight(2);
+mafast.HideBubble();
+mafast.SetHiding(!showWeekMA);
 
 ## 21 SMA
-plot maone = MovingAverage(avgtypSIM, c, pw);
-maone.SetDefaultColor(Color.WHITE);
+plot maone = MovingAverage(avgtypSIM, c, pm);
+maone.AssignValueColor(if c > maone then Color.GREEN else Color.RED);
 maone.SetLineWeight(2);
 maone.HideBubble();
+maone.SetHiding(!showMonthMA);
+
+## 126 SMA
+plot maslow = MovingAverage(avgtypSIM, c, ps);
+maslow.SetDefaultColor(Color.DARK_ORANGE);
+maslow.SetLineWeight(2);
+maslow.HideBubble();
+maslow.SetHiding(!showSimesterMA);
 
 ## 252 SMA
 plot matwo = MovingAverage(avgtypSIM, c, py);
-matwo.SetDefaultColor(Color.DARK_ORANGE);
+matwo.SetDefaultColor(Color.DARK_RED);
 matwo.SetLineWeight(2);
 matwo.HideBubble();
+matwo.SetHiding(!showYearlyMA);
 
 ## Keltner Channels
 def ks = ( sdp - 0.50 ) * MovingAverage(avgtypSIM, TrueRange(h, c, l), pm);
 def ka = MovingAverage(avgtypSIM, c, pm);
 plot kub = ka + ks;
-kub.SetDefaultColor(Color.BLUE);
+kub.SetDefaultColor(Color.VIOLET);
 kub.HideBubble();
+kub.SetHiding(!showKeltner);
 plot klb = ka - ks;
-klb.SetDefaultColor(Color.BLUE);
+klb.SetDefaultColor(Color.VIOLET);
 klb.HideBubble();
+klb.SetHiding(!showKeltner);
 
 ## Bollinger Bands
 def bbsd = StDev(c, pm);
@@ -64,13 +95,11 @@ def bbml = MovingAverage(avgtypSIM, c, pm);
 plot bblb = bbml + sdn * bbsd;
 bblb.SetDefaultColor(Color.BLUE);
 bblb.HideBubble();
+bblb.SetHiding(!showBollinger);
 plot bbub = bbml + sdp * bbsd;
 bbub.SetDefaultColor(Color.BLUE);
 bbub.HideBubble();
-
-## Keltner and Bollinger Cloud
-AddCloud( bbub, kub, Color.CURRENT, Color.RED);
-AddCloud( bblb, klb, Color.RED, Color.CURRENT);
+bbub.SetHiding(!showBollinger);
 
 ## VIX Calculated Portfolio Allocation Percentage
 def vc = close("vix")[ofs];
@@ -83,10 +112,12 @@ AddLabel(yes, "PA: " + pa + "%" + " VPA: " + vpa + "%", if vpa <= pa then Color.
 def bull = maone > median && maone > matwo && median > matwo;
 def accu = maone > median && maone > matwo && median < matwo;
 def reco = maone > median && maone < matwo && median < matwo;
+def mu = ( bull or reco );
 
 def bear = maone < median && maone < matwo && median < matwo;
 def dist = maone < median && maone < matwo && median > matwo;
 def weak = maone < median && maone > matwo && median > matwo;
+def md = ( bear or weak );
 
 AddLabel(bull, " + Markup + " , if bull is true then Color.GREEN else Color.GRAY);
 AddLabel(accu, " + Accumulation + ", if accu is true then Color.LIGHT_GREEN else Color.GRAY);
@@ -95,4 +126,14 @@ AddLabel(weak, " - Weaken - ", if weak is true then Color.LIGHT_ORANGE else Colo
 AddLabel(dist, " - Distribution - ", if dist is true then Color.LIGHT_RED else Color.GRAY);
 AddLabel(bear, " - Markdown - ", if bear is true then Color.RED else Color.GRAY);
 
-AssignPriceColor( if low < low[1] and close < low[1] and high > high[1] then Color.CYAN else if  low < low[1] and close > high[1] and high > high[1] then Color.CYAN else Color.CURRENT);
+plot UpSignal = if mafast crosses above maslow and mu then mafast else Double.NaN;
+UpSignal.SetHiding(!showBreakoutSignals);
+UpSignal.SetDefaultColor(Color.UPTICK);
+UpSignal.SetPaintingStrategy(PaintingStrategy.BOOLEAN_ARROW_UP);
+
+plot DownSignal = if mafast crosses below maslow and md then mafast else Double.NaN;
+DownSignal.SetDefaultColor(Color.DOWNTICK);
+DownSignal.SetPaintingStrategy(PaintingStrategy.BOOLEAN_ARROW_DOWN);
+DownSignal.SetHiding(!showBreakoutSignals);
+
+AssignPriceColor( if low < low[1] and close < low[1] and high > high[1] then Color.LIGHT_RED else if  low < low[1] and close > high[1] and high > high[1] then Color.LIGHT_GREEN else Color.CURRENT);
