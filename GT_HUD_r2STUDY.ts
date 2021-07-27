@@ -3,11 +3,12 @@
 input showChannel = yes;
 input showWeekMA = no;
 input showMonthMA = yes;
-input showSimesterMA = no;
-input showYearlyMA = yes;
+input showSimesterMA = yes;
+input showYearlyMA = no;
 input showBollinger = no;
 input showKeltner = no;
-input showBreakoutSignals = no;
+input showTransitionSignals = no;
+input showHedgeSignals = no;
 
 ## Standard Variables
 input avgtypSIM = AverageType.EXPONENTIAL;
@@ -64,21 +65,21 @@ maone.HideBubble();
 maone.SetHiding(!showMonthMA);
 
 ## 126 SMA
-plot maslow = MovingAverage(avgtypSIM, c, ps);
-maslow.SetDefaultColor(Color.DARK_ORANGE);
-maslow.SetLineWeight(2);
-maslow.HideBubble();
-maslow.SetHiding(!showSimesterMA);
-
-## 252 SMA
-plot matwo = MovingAverage(avgtypSIM, c, py);
-matwo.SetDefaultColor(Color.DARK_RED);
+plot matwo = MovingAverage(avgtypSIM, c, ps);
+matwo.SetDefaultColor(Color.DARK_ORANGE);
 matwo.SetLineWeight(2);
 matwo.HideBubble();
-matwo.SetHiding(!showYearlyMA);
+matwo.SetHiding(!showSimesterMA);
+
+## 252 SMA
+plot maslow = MovingAverage(avgtypSIM, c, py);
+maslow.SetDefaultColor(Color.DARK_RED);
+maslow.SetLineWeight(2);
+maslow.HideBubble();
+maslow.SetHiding(!showYearlyMA);
 
 ## Keltner Channels
-def ks = ( sdp - 0.50 ) * MovingAverage(avgtypSIM, TrueRange(h, c, l), pm);
+def ks = sdp * MovingAverage(avgtypSIM, TrueRange(h, c, l), pm);
 def ka = MovingAverage(avgtypSIM, c, pm);
 plot kub = ka + ks;
 kub.SetDefaultColor(Color.VIOLET);
@@ -102,11 +103,8 @@ bbub.HideBubble();
 bbub.SetHiding(!showBollinger);
 
 ## VIX Calculated Portfolio Allocation Percentage
-def vc = close("vix")[ofs];
-def pa = Round((GetNetLiq() - GetTotalCash()) / GetNetLiq() * 100, 1);
-def vpa = if vc >= 40 then 50 else if vc >= 30 and vc < 40 then 40 else if vc >= 20 and vc < 30 then 35 else if vc >= 15 and vc < 20 then 30 else 25;
+def vc = close("vix");
 AddLabel(yes, "$VIX = " + vc, if vc >= 40 then Color.RED else if vc >= 30 and vc < 40 then Color.ORANGE else if vc >= 20 and vc < 30 then Color.YELLOW else if vc >= 15 and vc < 20 then Color.GREEN else Color.LIGHT_GRAY);
-AddLabel(yes, "PA: " + pa + "%" + " VPA: " + vpa + "%", if vpa <= pa then Color.RED else Color.GREEN);
 
 ## Market Phase
 def bull = maone > median && maone > matwo && median > matwo;
@@ -126,14 +124,46 @@ AddLabel(weak, " - Weaken - ", if weak is true then Color.LIGHT_ORANGE else Colo
 AddLabel(dist, " - Distribution - ", if dist is true then Color.LIGHT_RED else Color.GRAY);
 AddLabel(bear, " - Markdown - ", if bear is true then Color.RED else Color.GRAY);
 
-plot UpSignal = if mafast crosses above maslow and mu then mafast else Double.NaN;
-UpSignal.SetHiding(!showBreakoutSignals);
-UpSignal.SetDefaultColor(Color.UPTICK);
-UpSignal.SetPaintingStrategy(PaintingStrategy.BOOLEAN_ARROW_UP);
+plot upsignal = if mafast crosses above maslow then mafast else Double.NaN;
+upsignal.SetHiding(!showTransitionSignals);
+upsignal.SetDefaultColor(Color.MAGENTA);
+upsignal.HideBubble();
+upsignal.SetPaintingStrategy(PaintingStrategy.BOOLEAN_ARROW_UP);
 
-plot DownSignal = if mafast crosses below maslow and md then mafast else Double.NaN;
-DownSignal.SetDefaultColor(Color.DOWNTICK);
-DownSignal.SetPaintingStrategy(PaintingStrategy.BOOLEAN_ARROW_DOWN);
-DownSignal.SetHiding(!showBreakoutSignals);
+plot downsignal = if mafast crosses below maslow then mafast else Double.NaN;
+downsignal.SetDefaultColor(Color.CYAN);
+downsignal.SetPaintingStrategy(PaintingStrategy.BOOLEAN_ARROW_DOWN);
+downsignal.HideBubble();
+downsignal.SetHiding(!showTransitionSignals);
+
+## Hedge Calulations
+def atr = ExpAverage(h - l, pq);
+def svs = l + Ceil((sdp + ofs) * atr / TickSize()) * TickSize();
+def lvs = h - Ceil((sdp + ofs) * atr / TickSize()) * TickSize();
+rec shortvs = if IsNaN(shortvs[1]) then svs else if h > shortvs[1] then svs else Min(svs, shortvs[1]);
+rec longvs = if IsNaN(longvs[1]) then lvs else if l < longvs[1] then lvs else Max(lvs, longvs[1]);
+def longswitch = if h >= shortvs[1] and h[1] < shortvs[1] then 1 else 0;
+def shortswitch = if l <= longvs[1] and l[1] > longvs[1] then 1 else 0;
+rec direction = CompoundValue(1, if IsNaN(direction[1]) then 0 else
+if direction[1] <= 0 and longswitch then 1
+else if direction[1] >= 0 and shortswitch then -1
+else direction[1], 0);
+
+plot ofhg = if direction < 0 then Double.NaN else longvs;
+ofhg.SetDefaultColor(Color.CYAN);
+ofhg.SetStyle(Curve.POINTS);
+ofhg.SetLineWeight(1);
+ofhg.HideBubble();
+ofhg.SetHiding(!showHedgeSignals);
+
+plot onhg = if direction > 0 then Double.NaN else shortvs;
+onhg.SetDefaultColor(Color.MAGENTA);
+onhg.SetStyle(Curve.POINTS);
+onhg.SetLineWeight(1);
+onhg.HideBubble();
+onhg.SetHiding(!showHedgeSignals);
+
+AddLabel(ofhg, " Hedge: Off " , if ofhg is true then Color.GREEN else Color.GRAY);
+AddLabel(onhg, " Hedge: On ", if onhg is true then Color.RED else Color.GRAY);
 
 AssignPriceColor( if low < low[1] and close < low[1] and high > high[1] then Color.LIGHT_RED else if  low < low[1] and close > high[1] and high > high[1] then Color.LIGHT_GREEN else Color.CURRENT);
